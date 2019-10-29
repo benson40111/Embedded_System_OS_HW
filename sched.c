@@ -62,30 +62,31 @@ static unsigned long loops_per_msec()
 
 // 子執行緒函數
 void *child() {
-  struct timespec start;
+    pthread_mutex_lock(&mutex);
 
-  int nrecord = 3;
-  struct timespec *logbuf = malloc(nrecord * sizeof(struct timespec));
-  unsigned long nloop_per_resol = loops_per_msec();
+    printf("Process %d was created...\n", pthread_self());
+	struct timespec start;
 
-  clock_gettime(CLOCK_MONOTONIC, &start);
-  child_fn(logbuf, nrecord, nloop_per_resol, start);
+	int nrecord = 3;
+	struct timespec *logbuf = malloc(nrecord * sizeof(struct timespec));
+	unsigned long nloop_per_resol = loops_per_msec();
+
+	clock_gettime(CLOCK_MONOTONIC, &start);
+	child_fn(logbuf, nrecord, nloop_per_resol, start);
+    pthread_mutex_unlock(&mutex);
 
 }
 
 // 主程式
 int main() {
-  pthread_t t[2]; // 宣告 pthread 變數
+	pthread_t t[2]; // 宣告 pthread 變數
 
-  for (int i = 0; i < 3; i++){
-pthread_mutex_lock(&mutex);
-    memset(&t[i], 0, sizeof(t[i]));
-    pthread_create(&t[i], NULL, child, NULL); // 建立子執行緒
-pthread_mutex_unlock(&mutex);
+  	for (int i = 0; i < 3; i++){
+    	memset(&t[i], 0, sizeof(t[i]));
+		pthread_create(&t[i], NULL, child, NULL); // 建立子執行緒
+    }
 
-  }
-
-  for (int i = 0; i < 3; i++)
-    pthread_join(t[i], NULL); // 等待子執行緒執行完成
-  return 0;
+	for (int i = 0; i < 3; i++)
+		pthread_join(t[i], NULL); // 等待子執行緒執行完成
+	return 0;
 }
