@@ -65,7 +65,7 @@ void *child(void* args) {
 	struct timespec *logbuf;
 	struct create_args *recv_args = (struct create_args*)args;
 	int i = 0;
-	i = recv_args.id;
+	recv_args.id = i;
 	//logbuf = (*recv_args).logbuf;
 
 	printf("Process %d was created...(%d)\n", i, pthread_self());
@@ -91,10 +91,11 @@ int main() {
 		int nrecord = 3;
 		struct timespec *logbuf = malloc(nrecord * sizeof(struct timespec));
 		struct timespec start;
-		struct create_args thread_args;
 
 
 		for (int i = 0; i < 3; i++) {
+				struct create_args thread_args;
+				thread_args.id = i;
 				memset(&t[i], 0, sizeof(t[i]));
 				pthread_create(&t[i], NULL, child, &(thread_args)); // 建立子執行緒
 		}
