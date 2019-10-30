@@ -14,93 +14,74 @@
 #define NSECS_PER_SEC 1000000000UL
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;
 
+double keep = 0.0;
+
+static double TimeSpecToSeconds(struct timespec* ts)
+{
+    return (double)ts->tv_sec + (double)ts->tv_nsec / 1000000.0;
+}
 
 static inline void load(unsigned long nloop)
 {
-		unsigned long i;
-		for (i = 0; i < nloop; i++)
-				;
+        unsigned long i;
+        for (i = 0; i < nloop; i++)
+                ;
 }
 
 static inline long diff_nsec(struct timespec before, struct timespec after)
 {
-		return ((after.tv_sec * NSECS_PER_SEC + after.tv_nsec)
-						- (before.tv_sec * NSECS_PER_SEC + before.tv_nsec));
-
-}
-
-static void child_fn(void* id, struct timespec *buf, int nrecord, unsigned long nloop_per_resol, struct timespec start)
-{
-		int i;
-		for (int i = 0; i < nrecord; i++) {
-				struct timespec ts;
-
-				load(nloop_per_resol);
-				clock_gettime(CLOCK_MONOTONIC, &ts);
-				buf[i] = ts;
-		}
-		for (int i = 0; i < nrecord; i++)
-				printf("%d(%d)\t%ld\n", pthread_self(), id, diff_nsec(start, buf[i]) / NSECS_PER_MSEC);
+        return ((after.tv_sec * NSECS_PER_SEC + after.tv_nsec)
+                - (before.tv_sec * NSECS_PER_SEC + before.tv_nsec));
 
 }
 
 static unsigned long loops_per_msec()
 {
-		struct timespec before, after;
-		clock_gettime(CLOCK_MONOTONIC, &before);
+        struct timespec before, after;
+        clock_gettime(CLOCK_MONOTONIC, &before);
 
-		unsigned long i;
-		for (i = 0; i < NLOOP_FOR_ESTIMATION; i++)
-				;
+        unsigned long i;
+        for (i = 0; i < NLOOP_FOR_ESTIMATION; i++)
+		;
 
-		clock_gettime(CLOCK_MONOTONIC, &after);
+        clock_gettime(CLOCK_MONOTONIC, &after);
 
-		int ret;
-		return  NLOOP_FOR_ESTIMATION * NSECS_PER_MSEC / diff_nsec(before, after);
+	int ret;
+        return  NLOOP_FOR_ESTIMATION * NSECS_PER_MSEC / diff_nsec(before, after);
 }
 
 // 子執行緒函數
-void *child(void* args) {
-	struct timespec *logbuf;
-	struct create_args *recv_args = (struct create_args*)args;
-	int i = 0;
-	recv_args.id = i;
-	//logbuf = (*recv_args).logbuf;
+void *child(void* id) {
+	pthread_mutex_lock(&mutex1);
+	printf("Process %d(%d) was created...\n", id, pthread_self());
+	pthread_mutex_unlock(&mutex1);
 
-	printf("Process %d was created...(%d)\n", i, pthread_self());
 	pthread_mutex_lock(&mutex);
 
-	unsigned long nloop_per_resol = loops_per_msec();
+	struct timespec start;
+	struct timespec end;
 
 	clock_gettime(CLOCK_MONOTONIC, &start);
-	child_fn(i, logbuf, 3, nloop_per_resol, start);
-
+	for (int i = 0 ; i < 3 ; i++)
+		printf("%d(%d) is running...\n", id, pthread_self());
+	clock_gettime(CLOCK_MONOTONIC, &end);
+	keep = TimeSpecToSeconds(&end) - TimeSpecToSeconds(&start);
+	printf("Total time: %.4lf msec\n", keep);
 	pthread_mutex_unlock(&mutex);
-	pthread_exit(NULL);
 
 }
-
-struct create_args {
-	int id;
-};
-
 
 int main() {
-		pthread_t t[2];	
-		int nrecord = 3;
-		struct timespec *logbuf = malloc(nrecord * sizeof(struct timespec));
-		struct timespec start;
+	pthread_t t[3]; 
 
+	for (int i = 0; i < 3; i++) {
+		memset(&t[i], 0, sizeof(t[i]));
+		pthread_create(&t[i], NULL, child, i);
+	}
 
-		for (int i = 0; i < 3; i++) {
-				struct create_args thread_args;
-				thread_args.id = i;
-				memset(&t[i], 0, sizeof(t[i]));
-				pthread_create(&t[i], NULL, child, &(thread_args)); // 建立子執行緒
-		}
-
-		for (int i = 0; i < 3; i++)
-				pthread_join(t[i], NULL); // 等待子執行緒執行完成
-		return 0;
-}
+	for (int i = 0; i < 2; i++)
+		pthread_join(t[i], NULL);
+	return 0;
+} 
