@@ -1,40 +1,24 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
-
-#define _GNU_SOURCE
-#include <pthread.h>
-#include <unistd.h>
-#include <sched.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <time.h>
-
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <err.h>
+#include <pthread.h>
+ 
 #define NLOOP_FOR_ESTIMATION 1000000000UL
 #define NSECS_PER_MSEC 1000000UL
 #define NSECS_PER_SEC 1000000000UL
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;
-
-double keep = 0.0;
-
-static double TimeSpecToSeconds(struct timespec* ts)
-{
-    return (double)ts->tv_sec + (double)ts->tv_nsec / 1000000.0;
-}
-
-static inline void load(unsigned long nloop)
-{
-        unsigned long i;
-        for (i = 0; i < nloop; i++)
-                ;
-}
 
 static inline long diff_nsec(struct timespec before, struct timespec after)
 {
         return ((after.tv_sec * NSECS_PER_SEC + after.tv_nsec)
                 - (before.tv_sec * NSECS_PER_SEC + before.tv_nsec));
-
+	
 }
 
 static unsigned long loops_per_msec()
@@ -51,37 +35,123 @@ static unsigned long loops_per_msec()
 	int ret;
         return  NLOOP_FOR_ESTIMATION * NSECS_PER_MSEC / diff_nsec(before, after);
 }
-
-// 子執行緒函數
-void *child(void* id) {
-	pthread_mutex_lock(&mutex1);
-	printf("Process %d(%d) was created...\n", id, pthread_self());
-	pthread_mutex_unlock(&mutex1);
-
-	pthread_mutex_lock(&mutex);
-
-	struct timespec start;
-	struct timespec end;
-
-	clock_gettime(CLOCK_MONOTONIC, &start);
-	for (int i = 0 ; i < 3 ; i++)
-		printf("%d(%d) is running...\n", id, pthread_self());
-	clock_gettime(CLOCK_MONOTONIC, &end);
-	keep = TimeSpecToSeconds(&end) - TimeSpecToSeconds(&start);
-	printf("Total time: %.4lf msec\n", keep);
-	pthread_mutex_unlock(&mutex);
-
+ 
+static inline void load(unsigned long nloop)
+{
+        unsigned long i;
+        for (i = 0; i < nloop; i++)
+                ;
 }
 
-int main() {
-	pthread_t t[3]; 
+static void child_fn(int id, struct timespec *buf, int nrecord, unsigned long nloop_per_resol, struct timespec start)
+{
+        int i;
+        for (i = 0; i < nrecord; i++) {
+                struct timespec ts;
 
-	for (int i = 0; i < 3; i++) {
-		memset(&t[i], 0, sizeof(t[i]));
-		pthread_create(&t[i], NULL, child, i);
-	}
+                load(nloop_per_resol);
+                clock_gettime(CLOCK_MONOTONIC, &ts);
+                buf[i] = ts;
+        }
+        for (i = 0; i < nrecord; i++) {
+                printf("%d\t%ld\t%d\n", id, diff_nsec(start, buf[i]) / NSECS_PER_MSEC, (i + 1) * 100 / nrecord);
+        }
+        exit(EXIT_SUCCESS);
+}
+ 
+static void parent_fn(int nproc)
+{
+        int i;
+        for (i = 0; i < nproc; i++)
+                wait(NULL);
+}
 
-	for (int i = 0; i < 2; i++)
-		pthread_join(t[i], NULL);
-	return 0;
-} 
+static pid_t *pids;
+
+int main(int argc, char *argv[])
+{
+        int ret = EXIT_FAILURE;
+
+        if (argc < 4) {
+                fprintf(stderr, "usage: %s <nproc> <total[ms]> <resolution[ms]>\n", argv[0]);
+                exit(EXIT_FAILURE);
+        }
+
+        int nproc = atoi(argv[1]);
+        int total = atoi(argv[2]);
+        int resol = atoi(argv[3]);
+
+        if (nproc < 1) {
+                fprintf(stderr, "<nproc>(%d) should be >= 1\n", nproc);
+                exit(EXIT_FAILURE);
+        }
+
+        if (total < 1) {
+                fprintf(stderr, "<total>(%d) should be >= 1\n", total);
+                exit(EXIT_FAILURE);
+        }
+
+        if (resol < 1) {
+                fprintf(stderr, "<resol>(%d) should be >= １\n", resol);
+                exit(EXIT_FAILURE);
+        }
+
+        if (total % resol) {
+                fprintf(stderr, "<total>(%d) should be multiple of <resolution>(%d)\n", total, resol);
+                exit(EXIT_FAILURE);
+        }
+        int nrecord = total / resol;
+
+        struct timespec *logbuf = malloc(nrecord * sizeof(struct timespec));
+	if (!logbuf)
+		err(EXIT_FAILURE, "malloc(logbuf) failed");
+
+	puts("estimating workload which takes just one milisecond");
+        unsigned long nloop_per_resol = loops_per_msec() * resol;
+	puts("end estimation");
+	fflush(stdout);
+
+        pids = malloc(nproc * sizeof(pid_t));
+        if (pids == NULL) {
+                warn("malloc(pids) failed");
+                goto free_logbuf;
+        }
+
+        struct timespec start;
+        clock_gettime(CLOCK_MONOTONIC, &start);
+
+        int i, ncreated;
+        for (i = 0, ncreated = 0; i < nproc; i++, ncreated++) {
+                pids[i] = fork();
+                if (pids[i] < 0) {
+                        goto wait_children;
+                } else if (pids[i] == 0) {
+                        // children
+			pthread_mutex_lock(&mutex);
+                        child_fn(i, logbuf, nrecord, nloop_per_resol, start);
+			pthread_mutex_unlock(&mutex);
+                        /* shouldn't reach here */
+                }
+        }
+        ret = EXIT_SUCCESS;
+
+        // parent
+
+wait_children:
+        if (ret == EXIT_FAILURE)
+                for (i = 0; i < ncreated; i++)
+                        if (kill(pids[i], SIGINT) < 0)
+                                warn("kill(%d) failed", pids[i]);
+
+        for (i = 0; i < ncreated; i++)
+                if (wait(NULL) < 0)
+                        warn("wait() failed.");
+
+free_pids:
+        free(pids);
+
+free_logbuf:
+        free(logbuf);
+
+        exit(ret);
+}
