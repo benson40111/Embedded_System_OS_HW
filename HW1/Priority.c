@@ -1,11 +1,3 @@
-/******************************************************************************
-
-Welcome to GDB Online.
-GDB online is an online compiler and debugger tool for C, C++, Python, PHP, Ruby, 
-C#, VB, Perl, Swift, Prolog, Javascript, Pascal, HTML, CSS, JS
-Code, Compile, Run and Debug online from anywhere in world.
-
-*******************************************************************************/
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <time.h>
@@ -97,7 +89,7 @@ int main(int argc, char *argv[])
         }
 
         if (resol < 1) {
-                fprintf(stderr, "<resol>(%d) should be >= ¢°\n", resol);
+                fprintf(stderr, "<resol>(%d) should be >= ï¿½ï¿½\n", resol);
                 exit(EXIT_FAILURE);
         }
 
