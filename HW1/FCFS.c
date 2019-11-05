@@ -122,16 +122,16 @@ int main(int argc, char *argv[])
 
         int i, ncreated;
         for (i = 0, ncreated = 0; i < nproc; i++, ncreated++) {
+		pthread_mutex_lock(&mutex);
                 pids[i] = fork();
                 if (pids[i] < 0) {
                         goto wait_children;
                 } else if (pids[i] == 0) {
                         // children
-			pthread_mutex_lock(&mutex);
                         child_fn(i, logbuf, nrecord, nloop_per_resol, start);
-			pthread_mutex_unlock(&mutex);
                         /* shouldn't reach here */
                 }
+		pthread_mutex_unlock(&mutex);
         }
         ret = EXIT_SUCCESS;
 
