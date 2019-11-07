@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
                 exit(EXIT_FAILURE);
         }
 
-        int nproc = 4;
+        int nproc = 3;
         int total = atoi(argv[1]);
         int resol = atoi(argv[2]);
 
@@ -125,16 +125,13 @@ int main(int argc, char *argv[])
                 } else if (pids[i] == 0) {
                         // children
                         if(i==0)
-                            nice(2);
-                            
-                        if(i==1)
-                            nice(1);
-                        
-                        if(i==2)
                             nice(0);
-                        
-                        if(i==3)
+                            
+                        else if(i==1)
                             nice(5);
+                        
+                        else if(i==2)
+                            nice(3);
 
                         child_fn(i, logbuf, nrecord, nloop_per_resol, start);
                         /* shouldn't reach here */
