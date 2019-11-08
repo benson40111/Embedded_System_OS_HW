@@ -1,5 +1,6 @@
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/resource.h>
 #include <time.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -74,6 +75,7 @@ static pid_t *pids;
 int main(int argc, char *argv[])
 {
 	int ret = EXIT_FAILURE;
+	pthread_barrier_init(&barrier, NULL, 3);
 
 	if (argc < 3) {
 		fprintf(stderr, "usage: %s <total[ms]> <resolution[ms]>\n", argv[0]);
