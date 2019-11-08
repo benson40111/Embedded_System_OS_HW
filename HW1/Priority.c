@@ -1,5 +1,6 @@
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/mman.h>
 #include <sys/resource.h>
 #include <time.h>
 #include <unistd.h>
@@ -12,6 +13,7 @@
 #define NSECS_PER_MSEC 1000000UL
 #define NSECS_PER_SEC 1000000000UL
 
+static int *cpu_time;
 
 static inline long diff_usec(struct timespec before, struct timespec after)
 {
@@ -54,7 +56,8 @@ static void child_fn(int id, struct timespec *buf, int nrecord, unsigned long nl
 	}
 
 	for (i = 0; i < nrecord; i++) {
-		printf("%d\t%d\t%d\n", id, i, (i + 1) * 100 / nrecord);
+		*cpu_time += 1;
+		printf("%d\t%d\t%d\n", id, *cpu_time, (i + 1) * 100 / nrecord);
 	}
 	exit(EXIT_SUCCESS);
 }
@@ -113,6 +116,7 @@ int main(int argc, char *argv[])
 	clock_gettime(CLOCK_MONOTONIC, &start);
 
 	int i, ncreated;
+	cpu_time = mmap(NULL, sizeof *cpu_time, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS, -1, 0);
 	for (i = 0, ncreated = 0; i < nproc; i++, ncreated++) {
 		pids[i] = fork();
 		if (pids[i] < 0) {
