@@ -6,10 +6,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <err.h>
+#include <pthread.h>
  
 #define NLOOP_FOR_ESTIMATION 1000000000UL
 #define NSECS_PER_MSEC 1000000UL
 #define NSECS_PER_SEC 1000000000UL
+
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static inline long diff_nsec(struct timespec before, struct timespec after)
 {
@@ -42,6 +45,7 @@ static inline void load(unsigned long nloop)
 
 static void child_fn(int id, struct timespec *buf, int nrecord, unsigned long nloop_per_resol, struct timespec start)
 {
+        printf("mutex lock %d\n", pthread_mutex_lock(&mutex));
         int i;
         for (i = 0; i < nrecord; i++) {
                 struct timespec ts;
@@ -53,7 +57,10 @@ static void child_fn(int id, struct timespec *buf, int nrecord, unsigned long nl
         for (i = 0; i < nrecord; i++) {
                 printf("%d\t%ld\t%d\n", id, diff_nsec(start, buf[i]) / NSECS_PER_MSEC, (i + 1) * 100 / nrecord);
         }
+
         exit(EXIT_SUCCESS);
+        printf("mutex unlock %d\n", pthread_mutex_unlock(&mutex));
+
 }
  
 static void parent_fn(int nproc)
@@ -124,16 +131,25 @@ int main(int argc, char *argv[])
                         goto wait_children;
                 } else if (pids[i] == 0) {
                         // children
-                        if(i==0)
-                            nice(0);
-                            
-                        else if(i==1)
-                            nice(5);
+                        switch (i)
+                        {
+                        case 0:
+                                printf("%d\n",nice(0));
+                                break;
+                        case 1:
+                                printf("%d\n",nice(10));
+                                break;
+                        case 2:
+                                printf("%d\n",nice(5));
+                                break;
                         
-                        else if(i==2)
-                            nice(3);
-
+                        default:
+                                printf("Error!\n");
+                                break;
+                        }
+                            
                         child_fn(i, logbuf, nrecord, nloop_per_resol, start);
+                        
                         /* shouldn't reach here */
                 }
         }
