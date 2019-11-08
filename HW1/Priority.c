@@ -7,13 +7,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <err.h>
-#include <pthread.h>
 
 #define NLOOP_FOR_ESTIMATION 1000000000UL
 #define NSECS_PER_MSEC 1000000UL
 #define NSECS_PER_SEC 1000000000UL
 
-pthread_barrier_t barrier;
 
 static inline long diff_usec(struct timespec before, struct timespec after)
 {
@@ -46,7 +44,6 @@ static inline void load(unsigned long nloop)
 
 static void child_fn(int id, struct timespec *buf, int nrecord, unsigned long nloop_per_resol, struct timespec start)
 {
-        pthread_barrier_wait(&barrier);
 	int i;
 	for (i = 0; i < nrecord; i++) {
 		struct timespec ts;
@@ -55,7 +52,6 @@ static void child_fn(int id, struct timespec *buf, int nrecord, unsigned long nl
 		clock_gettime(CLOCK_MONOTONIC, &ts);
 		buf[i] = ts;
 	}
-                printf("Process %d is running...\n", getpid());
 
 	for (i = 0; i < nrecord; i++) {
 		printf("%d\t%ld\t%d\n", id, diff_usec(start, buf[i]) / NSECS_PER_MSEC, (i + 1) * 100 / nrecord);
@@ -75,7 +71,6 @@ static pid_t *pids;
 int main(int argc, char *argv[])
 {
 	int ret = EXIT_FAILURE;
-	pthread_barrier_init(&barrier, NULL, 3);
 
 	if (argc < 3) {
 		fprintf(stderr, "usage: %s <total[ms]> <resolution[ms]>\n", argv[0]);
@@ -126,23 +121,12 @@ int main(int argc, char *argv[])
 			// children
 
 			if (i == 0) {
-				setpriority(PRIO_PROCESS, getpid(), 5);;
-				printf("Process(%d) priority:%d\n",  getpid(), getpriority(PRIO_PROCESS,getpid()));
-                                child_fn(i, logbuf, nrecord, nloop_per_resol, start);
-
+				nice(5);
 			}
-			else if (i == 1) {
-				setpriority(PRIO_PROCESS, getpid(), 10);;
-				printf("Process(%d) priority:%d\n", getpid(), getpriority(PRIO_PROCESS,getpid()));
-                                child_fn(i, logbuf, nrecord, nloop_per_resol, start);
-
+			else if (i == 2) {
+				nice(10);
 			}
-			else {
-				setpriority(PRIO_PROCESS, getpid(), -5);;
-				printf("Process(%d) priority:%d\n", getpid(), getpriority(PRIO_PROCESS,getpid()));
-                                child_fn(i, logbuf, nrecord, nloop_per_resol, start);
-
-			}
+            child_fn(i, logbuf, nrecord, nloop_per_resol, start);
 			/* shouldn't reach here */
 		}
 	}
