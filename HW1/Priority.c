@@ -123,8 +123,8 @@ int main(int argc, char *argv[])
 			if (i == 0) {
 				nice(5);
 			}
-			else if (i == 2) {
-				nice(10);
+			else if (i == 1) {
+				nice(-5);
 			}
             child_fn(i, logbuf, nrecord, nloop_per_resol, start);
 			/* shouldn't reach here */
