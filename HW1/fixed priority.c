@@ -124,12 +124,12 @@ int main(int argc, char *argv[])
 		} else if (pids[i] == 0) {
 			// children
 
-			if (i == 0) {
+			if (i == 0) 
 				nice(5);
-			}
-			else if (i == 1) {
+			
+			else if (i == 1) 
 				nice(-5);
-			}
+			
             child_fn(i, logbuf, nrecord, nloop_per_resol, start);
 			/* shouldn't reach here */
 		}
