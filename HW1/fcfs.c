@@ -1,3 +1,8 @@
+/*
+Fork from github:https://github.com/satoru-takeuchi/linux-in-practice
+Author:satoru-takeuchi
+*/
+
 #include <sys/wait.h>
 #include <signal.h>
 #include <time.h>
