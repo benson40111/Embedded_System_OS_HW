@@ -15,12 +15,17 @@ int main()
     struct timeval tv1, tv2;
 	char s[] = "This is hello";
     
-	printf("Standard I/O...\n");
-    //read
+    //std io
+    printf("Standard I/O...\n");
 
     gettimeofday(&tv1, NULL);
     std_fd = open("testfile_write", O_WRONLY);
-	write(std_fd, s, sizeof(s));
+	if (write(std_fd, s, sizeof(s)) == -1)
+    {
+        close(std_fd);
+        perror("Error writing!!");
+        exit(EXIT_FAILURE);
+    }
     close(std_fd);
 	std_fd = open("testfile_write", O_RDONLY);
 	std_size = read(std_fd, buffer, sizeof(buffer));
@@ -32,28 +37,24 @@ int main()
     
     //mmap
 	printf("mmap...\n");
+    int fd = 0;
+	int size = sizeof(char);
+    tv1.tv_usec = 0;
+    tv2.tv_usec = 0;
 
-	char buffer1[100];
-	int fd = 0;
-	size_t size = sizeof(char);
     gettimeofday(&tv1, NULL);
-    fd = open("testfile_mmap", O_RDWR|O_TRUNC);
-	size_t textsize = strlen(s) + 1;
-	if (lseek(fd, size, SEEK_SET) == -1)
-    {
-        close(fd);
-        perror("Error calling lseek() to 'stretch' the file");
-        exit(EXIT_FAILURE);
-    }
+    fd = open("testfile_mmap", O_RDWR);
+	
 	if (write(fd, "", 1) == -1)
     {
         close(fd);
         perror("Error writing last byte of the file");
         exit(EXIT_FAILURE);
     }
+    
 	char *map;
 	map = mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-	for (size_t i = 0; i < textsize; i++)
+	for (int i = 0; i < sizeof(s); i++)
         map[i] = s[i];
     
 
@@ -63,15 +64,20 @@ int main()
     }
     
 	close(fd);
-    gettimeofday(&tv2, NULL);
-
-	printf("Read text is:%s\n", map);
-    printf("Time of mmap: %dms\n", tv2.tv_usec - tv1.tv_usec);
-	if (munmap(map, size) == -1)
+    fd = 0;
+    fd = open("testfile_mmap", O_RDWR);
+    map = mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+    printf("Read text is:%s\n", map);
+    if (munmap(map, size) == -1)
     {
         close(fd);
         perror("Error un-mmapping the file");
         exit(EXIT_FAILURE);
     }
+    close(fd);
+    gettimeofday(&tv2, NULL);
+
+    printf("Time of mmap: %dms\n", tv2.tv_usec - tv1.tv_usec);
+	
     return 0;
 }
