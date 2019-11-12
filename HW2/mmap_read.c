@@ -14,17 +14,14 @@ int main()
 	char buffer[100];
     struct timeval tv1, tv2;
 	char s[] = "This is hello";
-    
+    int size = sizeof(s);
+
     //std io
     printf("Standard I/O...\n");
 
     gettimeofday(&tv1, NULL);
-	char text[10000];
     std_fd = open("testfile_write", O_WRONLY);
-	for (int i = 0 ; i < sizeof(s) ; i++)
-		text[i] = s[i];
-
-	if (write(std_fd, s, sizeof(text)) == -1)
+	if (write(std_fd, s, sizeof(s)) == -1)
     {
         close(std_fd);
         perror("Error writing!!");
@@ -33,22 +30,26 @@ int main()
     close(std_fd);
 	std_fd = open("testfile_write", O_RDONLY);
 	std_size = read(std_fd, buffer, sizeof(buffer));
+    printf("Read text is:%s\n", buffer);
 	close(std_fd);
     gettimeofday(&tv2, NULL);
 
-	printf("Read text is:%s\n", buffer);
     printf("Time of read/write: %dms\n", tv2.tv_usec - tv1.tv_usec);
     
     //mmap
 	printf("mmap...\n");
     int fd = 0;
-	int size = sizeof(s) + 1;
     tv1.tv_usec = 0;
     tv2.tv_usec = 0;
 
     gettimeofday(&tv1, NULL);
     fd = open("testfile_mmap", O_RDWR);
-	
+    if (lseek(fd, size - 1, SEEK_SET) == -1)
+    {
+        close(fd);
+        perror("Error calling lseek() to 'stretch' the file");
+        exit(EXIT_FAILURE);
+    }
 	if (write(fd, "", 1) == -1)
     {
         close(fd);
@@ -67,7 +68,6 @@ int main()
     }
     
 	close(fd);
-    /*fd = 0;
     fd = open("testfile_mmap", O_RDWR);
     map = mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
     printf("Read text is:%s\n", map);
@@ -77,7 +77,7 @@ int main()
         perror("Error un-mmapping the file");
         exit(EXIT_FAILURE);
     }
-    close(fd);*/
+    close(fd);
     gettimeofday(&tv2, NULL);
 
     printf("Time of mmap: %dms\n", tv2.tv_usec - tv1.tv_usec);
