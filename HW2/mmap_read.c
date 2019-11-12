@@ -19,8 +19,12 @@ int main()
     printf("Standard I/O...\n");
 
     gettimeofday(&tv1, NULL);
+	char text[10000];
     std_fd = open("testfile_write", O_WRONLY);
-	if (write(std_fd, s, sizeof(s)) == -1)
+	for (int i = 0 ; i < sizeof(s) ; i++)
+		text[i] = s[i];
+
+	if (write(std_fd, s, sizeof(text)) == -1)
     {
         close(std_fd);
         perror("Error writing!!");
@@ -38,7 +42,7 @@ int main()
     //mmap
 	printf("mmap...\n");
     int fd = 0;
-	int size = sizeof(char);
+	int size = sizeof(s) + 1;
     tv1.tv_usec = 0;
     tv2.tv_usec = 0;
 
@@ -54,9 +58,8 @@ int main()
     
 	char *map;
 	map = mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-	for (int i = 0; i < sizeof(s); i++)
+	for (int i = 0; i < size - 1; i++)
         map[i] = s[i];
-    
 
 	if (msync(map, size, MS_SYNC) == -1)
     {
@@ -64,7 +67,7 @@ int main()
     }
     
 	close(fd);
-    fd = 0;
+    /*fd = 0;
     fd = open("testfile_mmap", O_RDWR);
     map = mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
     printf("Read text is:%s\n", map);
@@ -74,7 +77,7 @@ int main()
         perror("Error un-mmapping the file");
         exit(EXIT_FAILURE);
     }
-    close(fd);
+    close(fd);*/
     gettimeofday(&tv2, NULL);
 
     printf("Time of mmap: %dms\n", tv2.tv_usec - tv1.tv_usec);
