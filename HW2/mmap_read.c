@@ -1,7 +1,6 @@
 #include<unistd.h>
 #include<stdio.h>
 #include<stdlib.h>
-#include<string.h>
 #include<sys/types.h>
 #include<sys/stat.h>
 #include<sys/time.h>
@@ -11,7 +10,7 @@
 int main()
 {
     int std_size = 0, std_fd = 0;
-	char buffer[100];
+	char buffer[1000];
     struct timeval tv1, tv2;
 	char s[] = "This is hello";
     int size = sizeof(s);
@@ -20,7 +19,8 @@ int main()
     printf("Standard I/O...\n");
 
     gettimeofday(&tv1, NULL);
-    std_fd = open("testfile_write", O_WRONLY);
+    std_fd = open("testfile_write.txt", O_WRONLY);
+
 	if (write(std_fd, s, sizeof(s)) == -1)
     {
         close(std_fd);
@@ -28,8 +28,14 @@ int main()
         exit(EXIT_FAILURE);
     }
     close(std_fd);
-	std_fd = open("testfile_write", O_RDONLY);
+	std_fd = open("testfile_write.txt", O_RDONLY);
+
 	std_size = read(std_fd, buffer, sizeof(buffer));
+    if (std_size < 0)
+    {
+        perror("Error Reading!!");
+        exit(EXIT_FAILURE);
+    }
     printf("Read text is:%s\n", buffer);
 	close(std_fd);
     gettimeofday(&tv2, NULL);
@@ -43,13 +49,14 @@ int main()
     tv2.tv_usec = 0;
 
     gettimeofday(&tv1, NULL);
-    fd = open("testfile_mmap", O_RDWR);
+    fd = open("testfile_mmap.txt", O_RDWR);
     if (lseek(fd, size - 1, SEEK_SET) == -1)
     {
         close(fd);
         perror("Error calling lseek() to 'stretch' the file");
         exit(EXIT_FAILURE);
     }
+
 	if (write(fd, "", 1) == -1)
     {
         close(fd);
@@ -68,7 +75,7 @@ int main()
     }
     
 	close(fd);
-    fd = open("testfile_mmap", O_RDWR);
+    fd = open("testfile_mmap.txt", O_RDWR);
     map = mmap(NULL, size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
     printf("Read text is:%s\n", map);
     if (munmap(map, size) == -1)
