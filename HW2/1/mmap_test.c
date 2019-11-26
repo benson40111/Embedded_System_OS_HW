@@ -1,3 +1,9 @@
+/*
+Copy from https://blog.csdn.net/mg0832058/article/details/5890688
+版权声明：本文为CSDN博主「mg0832058」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/mg0832058/article/details/5890688
+*/
+
 #include<unistd.h>
 
 #include<stdio.h>
