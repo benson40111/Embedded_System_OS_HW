@@ -1,0 +1,54 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	0.0.0	/3fdf28bc/
+BUFFER_SIZE	HW2/2/demand-paging.c	/^#define BUFFER_SIZE	/;"	kind:d	line:8	file:
+BUFFER_SIZE	HW2/2/demand-paging_repeat.c	/^#define BUFFER_SIZE	/;"	kind:d	line:8	file:
+CACHE_LINE_SIZE	HW3/cache.c	/^#define CACHE_LINE_SIZE	/;"	kind:d	line:8	file:
+Embedded_System_OS_HW	README.md	/^# Embedded_System_OS_HW$/;"	kind:c	line:1
+Just a homework	README.md	/^## Just a homework$/;"	kind:s	line:3
+MAX	HW2/1/mmap_test.c	/^#define MAX /;"	kind:d	line:26	file:
+NCYCLE	HW2/2/demand-paging.c	/^#define NCYCLE	/;"	kind:d	line:9	file:
+NCYCLE	HW2/2/demand-paging_repeat.c	/^#define NCYCLE	/;"	kind:d	line:9	file:
+NLOOP	HW3/cache.c	/^#define NLOOP	/;"	kind:d	line:9	file:
+NLOOP_FOR_ESTIMATION	HW1/fixed priority.c	/^#define NLOOP_FOR_ESTIMATION /;"	kind:d	line:17	file:
+NLOOP_FOR_ESTIMATION	HW1/rr.c	/^#define NLOOP_FOR_ESTIMATION /;"	kind:d	line:15	file:
+NSECS_PER_MSEC	HW1/fixed priority.c	/^#define NSECS_PER_MSEC /;"	kind:d	line:18	file:
+NSECS_PER_MSEC	HW1/rr.c	/^#define NSECS_PER_MSEC /;"	kind:d	line:16	file:
+NSECS_PER_SEC	HW1/fixed priority.c	/^#define NSECS_PER_SEC /;"	kind:d	line:19	file:
+NSECS_PER_SEC	HW1/rr.c	/^#define NSECS_PER_SEC /;"	kind:d	line:17	file:
+NSECS_PER_SEC	HW3/cache.c	/^#define NSECS_PER_SEC	/;"	kind:d	line:10	file:
+PAGE_SIZE	HW2/2/demand-paging.c	/^#define PAGE_SIZE	/;"	kind:d	line:10	file:
+PAGE_SIZE	HW2/2/demand-paging_repeat.c	/^#define PAGE_SIZE	/;"	kind:d	line:10	file:
+Program is fork from https://github.com/satoru-takeuchi/linux-in-practice	README.md	/^## Program is fork from https:\/\/github.com\/satoru-takeuchi\/linux-in-practice$/;"	kind:s	line:4
+child_fn	HW1/fcfs.c	/^void *child_fn(void *num)$/;"	kind:f	line:21	typeref:typename:void *	signature:(void * num)
+child_fn	HW1/fixed priority.c	/^static void child_fn(int id, struct timespec *buf, int nrecord, unsigned long nloop_per_resol, s/;"	kind:f	line:52	typeref:typename:void	file:	signature:(int id,struct timespec * buf,int nrecord,unsigned long nloop_per_resol,struct timespec start)
+child_fn	HW1/rr.c	/^static void child_fn(int id, struct timespec *buf, int nrecord, unsigned long nloop_per_resol, s/;"	kind:f	line:45	typeref:typename:void	file:	signature:(int id,struct timespec * buf,int nrecord,unsigned long nloop_per_resol,struct timespec start)
+cpu_time	HW1/fcfs.c	/^int cpu_time = 0;$/;"	kind:v	line:18	typeref:typename:int
+cpu_time	HW1/fixed priority.c	/^static int *cpu_time;$/;"	kind:v	line:21	typeref:typename:int *	file:
+diff_nsec	HW1/rr.c	/^static inline long diff_nsec(struct timespec before, struct timespec after)$/;"	kind:f	line:19	typeref:typename:long	file:	signature:(struct timespec before,struct timespec after)
+diff_nsec	HW3/cache.c	/^static inline long diff_nsec(struct timespec before, struct timespec after)$/;"	kind:f	line:12	typeref:typename:long	file:	signature:(struct timespec before,struct timespec after)
+diff_usec	HW1/fixed priority.c	/^static inline long diff_usec(struct timespec before, struct timespec after)$/;"	kind:f	line:23	typeref:typename:long	file:	signature:(struct timespec before,struct timespec after)
+load	HW1/fixed priority.c	/^static inline void load(unsigned long nloop)$/;"	kind:f	line:45	typeref:typename:void	file:	signature:(unsigned long nloop)
+load	HW1/rr.c	/^static inline void load(unsigned long nloop)$/;"	kind:f	line:39	typeref:typename:void	file:	signature:(unsigned long nloop)
+loops_per_msec	HW1/fixed priority.c	/^static unsigned long loops_per_msec()$/;"	kind:f	line:29	typeref:typename:unsigned long	file:	signature:()
+loops_per_msec	HW1/rr.c	/^static unsigned long loops_per_msec()$/;"	kind:f	line:24	typeref:typename:unsigned long	file:	signature:()
+main	HW1/fcfs.c	/^int main(int argc, char *argv[])$/;"	kind:f	line:39	typeref:typename:int	signature:(int argc,char * argv[])
+main	HW1/fixed priority.c	/^int main(int argc, char *argv[])$/;"	kind:f	line:79	typeref:typename:int	signature:(int argc,char * argv[])
+main	HW1/rr.c	/^int main(int argc, char *argv[])$/;"	kind:f	line:72	typeref:typename:int	signature:(int argc,char * argv[])
+main	HW2/1/mmap_read.c	/^int main()$/;"	kind:f	line:10	typeref:typename:int	signature:()
+main	HW2/1/mmap_test.c	/^int main()$/;"	kind:f	line:29	typeref:typename:int	signature:()
+main	HW2/2/demand-paging.c	/^int main(void)$/;"	kind:f	line:12	typeref:typename:int	signature:(void)
+main	HW2/2/demand-paging_repeat.c	/^int main(void)$/;"	kind:f	line:12	typeref:typename:int	signature:(void)
+main	HW2/3/loop.c	/^int main()$/;"	kind:f	line:5	typeref:typename:int	signature:()
+main	HW3/cache.c	/^int main(int argc, char *argv[])$/;"	kind:f	line:18	typeref:typename:int	signature:(int argc,char * argv[])
+mutex	HW1/fcfs.c	/^pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;$/;"	kind:v	line:16	typeref:typename:pthread_mutex_t
+mutex1	HW1/fcfs.c	/^pthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;$/;"	kind:v	line:17	typeref:typename:pthread_mutex_t
+parent_fn	HW1/fixed priority.c	/^static void parent_fn(int nproc)$/;"	kind:f	line:70	typeref:typename:void	file:	signature:(int nproc)
+parent_fn	HW1/rr.c	/^static void parent_fn(int nproc)$/;"	kind:f	line:63	typeref:typename:void	file:	signature:(int nproc)
+pids	HW1/fixed priority.c	/^static pid_t *pids;$/;"	kind:v	line:77	typeref:typename:pid_t *	file:
+pids	HW1/rr.c	/^static pid_t *pids;$/;"	kind:v	line:70	typeref:typename:pid_t *	file:
+total	HW1/fcfs.c	/^int total = 0;$/;"	kind:v	line:19	typeref:typename:int
